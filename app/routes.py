@@ -1,11 +1,19 @@
-from flask import render_template, request, flash
+from flask import render_template, request, flash, session
 import hashlib
 from app import app, db
 from app.models import User
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    logged_in = False
+    if 'name' in session:
+        logged_in = True
+        name = session['name']
+        email = session['email']
+    else:
+        name = None
+        email = None
+    return render_template('index.html', name=name, email=email, logged_in=logged_in)
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -28,6 +36,9 @@ def login_page():
             flash("Invalid email or password!")
             return render_template('login.html')
         else:
+            # python sessions https://pythonbasics.org/flask-sessions/
+            session['name'] = user.name
+            session['email'] = user.email
             return render_template('welcome.html', name=user.name)
 
 

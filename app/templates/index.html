@@ -6,9 +6,18 @@
 </head>
 <body>
 <h1 style="color: #773434">Welcome to Notes App</h1>
+
+{% if logged_in %}
+
+<p>Logged in as {{email}}</p>
+
+{% else %}
+
 <ul>
     <li><a href="/login">Login</a> </li>
     <li><a href="/sign-up">Sign Up</a> </li>
 </ul>
+
+{% endif %}
 </body>
 </html>
