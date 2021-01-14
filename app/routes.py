@@ -3,12 +3,6 @@ import hashlib
 from app import app, db
 from app.models import User
 
-user_profile = {
-    'name': 'Israel',
-    'email': 'test@test.com',
-    'password': 'mySecret'
-}
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -23,11 +17,18 @@ def login_page():
         password = request.form['password']
         print('Submitted email ' + str(email))
         print('Submitted password ' + str(password))
-        if email == user_profile['email'] and password == user_profile['password']:
-            return render_template('welcome.html', name=user_profile['name'])
-        else:
-            flash('Invalid username and password!')
+        # hash submitted password
+        password_hash = hashlib.sha256(password.encode())
+        hashed = password_hash.hexdigest()
+
+        # query the database for hashed password and email
+        user = User.query.filter((User.email == email) & (User.password_hash == hashed)).first()
+
+        if user is None:
+            flash("Invalid email or password!")
             return render_template('login.html')
+        else:
+            return render_template('welcome.html', name=user.name)
 
 
 @app.route('/sign-up', methods=['POST', 'GET'])
@@ -57,10 +58,11 @@ def sign_up():
         # "Signup success"
         password_hash = hashlib.sha256(password.encode())
         hashed = password_hash.hexdigest()
-        user = User(name=name, email=email, phone=phone, password_hash=password)
+        user = User(name=name, email=email, phone=phone, password_hash=hashed)
         db.session.add(user)
         db.session.commit()
-        return "You have been registered successfully! {}".format(name)
+        flash("Registration successful!")
+        return render_template('welcome.html', name=user.name)
 
 
 @app.route('/test')
