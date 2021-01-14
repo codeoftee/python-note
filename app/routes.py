@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, session
+from flask import render_template, request, flash, session, redirect, url_for
 import hashlib
 from app import app, db
 from app.models import User
@@ -39,7 +39,7 @@ def login_page():
             # python sessions https://pythonbasics.org/flask-sessions/
             session['name'] = user.name
             session['email'] = user.email
-            return render_template('welcome.html', name=user.name)
+            return redirect(url_for('index'))
 
 
 @app.route('/sign-up', methods=['POST', 'GET'])
@@ -73,12 +73,13 @@ def sign_up():
         db.session.add(user)
         db.session.commit()
         flash("Registration successful!")
-        return render_template('welcome.html', name=user.name)
+        session['name'] = user.name
+        session['email'] = user.email
+        return redirect(url_for('index'))
 
 
-@app.route('/test')
-def add_user():
-    u = User(name='Queen', email='queen@example.com', phone='0809988776676', password_hash='pass_hash')
-    db.session.add(u)
-    db.session.commit()
-    return u.name + ' Added'
+@app.route('/logout')
+def log_user_out():
+    session.pop('name', None)
+    session.pop('email', None)
+    return redirect(url_for('index'))
