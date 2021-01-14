@@ -5,14 +5,15 @@ from app.models import User
 
 @app.route('/')
 def index():
-    logged_in = False
+    logged_in = True
     if 'name' in session:
-        logged_in = True
         name = session['name']
         email = session['email']
     else:
-        name = None
-        email = None
+        name = request.cookies.get('name')
+        email = request.cookies.get('email')
+        if name is None or email is None:
+            logged_in = False
     return render_template('index.html', name=name, email=email, logged_in=logged_in)
 
 
@@ -39,7 +40,11 @@ def login_page():
             # python sessions https://pythonbasics.org/flask-sessions/
             session['name'] = user.name
             session['email'] = user.email
-            return redirect(url_for('index'))
+            resp = redirect(url_for('index'))
+            # python sessions https://pythonbasics.org/flask-cookies/
+            resp.set_cookie('name', user.name)
+            resp.set_cookie('email', user.email)
+            return resp
 
 
 @app.route('/sign-up', methods=['POST', 'GET'])
@@ -82,4 +87,7 @@ def sign_up():
 def log_user_out():
     session.pop('name', None)
     session.pop('email', None)
-    return redirect(url_for('index'))
+    resp = redirect(url_for('index'))
+    resp.set_cookie('name', '')
+    resp.set_cookie('email', '', expires=0)
+    return resp
