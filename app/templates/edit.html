@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome To my website</title>
+    <title>Edit {{note.title}}</title>
 
     <!-- Bootstrap CSS-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
@@ -21,16 +21,6 @@
 
 </head>
 <body>
-<h1 style="color: #773434">Welcome to Notes App</h1>
-
-{% if logged_in %}
-
-<p>Logged in as {{name}} ({{email}})</p>
-
-<ul>
-    <li><a href="/notes/all">View Notes</a></li>
-    <li><a href="/logout">Logout</a></li>
-</ul>
 
 <div class="container">
     {% with messages = get_flashed_messages() %}
@@ -41,30 +31,24 @@
     {% endif %}
     {% endwith %}
     <div class="new-note">
-        <h4 class="text-center">Create New Note</h4>
-        <form name="note-form" action="/notes/create" method="post">
+        <h4 class="text-center">Edit {{note.title}}</h4>
+        <form name="note-form" action="/notes/update/{{note.id}}" method="post">
             <div class="form-group">
-                <input class="form-control" name="title" placeholder="Note Title">
+                <input class="form-control" name="title" placeholder="Note Title" value="{{note.title}}">
             </div>
 
             <div class="form-group">
-                <textarea name="content" class="form-control" placeholder="Enter content"></textarea>
+                <textarea name="content" class="form-control" placeholder="Enter content">
+                    {{note.content}}
+                </textarea>
             </div>
 
             <div class="text-right">
-                <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> SAVE</button>
+                <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> UPDATE</button>
             </div>
         </form>
     </div>
 </div>
 
-{% else %}
-
-<ul>
-    <li><a href="/login">Login</a></li>
-    <li><a href="/sign-up">Sign Up</a></li>
-</ul>
-
-{% endif %}
 </body>
 </html>

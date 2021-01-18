@@ -1,7 +1,9 @@
-from flask import render_template, request, flash, session, redirect, url_for
+from flask import render_template, request, flash, session, redirect, url_for, jsonify
 import hashlib
 from app import app, db
-from app.models import User
+from app.models import User, Notes
+
+from app.my_functions import check_login
 
 @app.route('/')
 def index():
@@ -91,3 +93,96 @@ def log_user_out():
     resp.set_cookie('name', '')
     resp.set_cookie('email', '', expires=0)
     return resp
+
+
+@app.route('/notes/create', methods=['POST'])
+def create_note():
+    title = request.form['title']
+    content = request.form['content']
+    # check submitted stuffs
+    if title is None or content is None:
+        flash('Please enter title and content')
+        return redirect(url_for('index'))
+
+    if len(title) < 2 or len(content) < 2:
+        flash('Please enter title and content')
+        return redirect(url_for('index'))
+
+    # check user session and cookies
+    user = check_login()
+    # if user is False redirect to login
+    if user is False:
+        return redirect(url_for('login_page'))
+    # create note
+    new_note = Notes(title=title, content=content, user_id=user.id)
+    db.session.add(new_note)
+    db.session.commit()
+    flash('{} has been saved successfully!'.format(title))
+    return redirect(url_for('index'))
+
+
+@app.route('/notes/all')
+def get_notes():
+    # check user session and cookies
+    user = check_login()
+    # if user is False redirect to login
+    if user is False:
+        return redirect(url_for('login_page'))
+
+    user_id = user.id
+
+    notes_obj = Notes.query.filter(Notes.user_id == user_id).all()
+    notes = []
+    for item in notes_obj:
+        item_dict = {
+            'title': item.title,
+            'content': item.content,
+            'created': item.created,
+            'id': item.id
+        }
+        notes.append(item_dict)
+
+    return render_template('notes.html', notes=notes)
+
+
+@app.route('/notes/edit/<note_id>')
+def edit_note_page(note_id):
+    note = Notes.query.filter_by(id=note_id).first()
+    if note is None:
+        flash('Note not found!')
+        return render_template('notes.html')
+
+    return render_template('edit.html', note=note)
+
+
+@app.route('/notes/update/<note_id>', methods=['POST'])
+def update_note(note_id):
+    title = request.form['title']
+    content = request.form['content']
+    # check submitted stuffs
+    if title is None or content is None:
+        flash('Please enter title and content')
+        return redirect(url_for('get_notes'))
+
+    if len(title) < 2 or len(content) < 2:
+        flash('Please enter title and content')
+        return redirect(url_for('get_notes'))
+
+    # check user session and cookies
+    user = check_login()
+    # if user is False redirect to login
+    if user is False:
+        return redirect(url_for('login_page'))
+
+    # get the note
+    note = Notes.query.filter_by(id=note_id).first()
+    if note is None:
+        flash('Note not found!')
+        return redirect(url_for('get_notes'))
+
+    # update the note
+    note.title = title
+    note.content = content
+    db.session.commit()
+    flash('{} updated successfully!'.format(note.title))
+    return redirect(url_for('get_notes'))
