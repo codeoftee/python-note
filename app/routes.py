@@ -211,3 +211,6 @@ def delete_note(note_id):
         # user is not the owner of the note.
         flash('Unable to delete {}! Permission denied.'.format(note.title))
         return redirect(url_for('get_notes'))
+
+# full flask project tutorial
+# https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-templates
