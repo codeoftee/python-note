@@ -37,36 +37,53 @@
 </head>
 <body>
 <div class="container">
+
+
+    <div class="text-center">
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <b class="text-success">{{message}}</b>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+
     <div class="text-center" style="margin-top: 20px">
-            <i class="fa fa-edit fa-2x"></i>
-            <h4> <span class="g-font">Tee Notes</span> </h4>
-        </div>
+        <i class="fa fa-edit fa-2x"></i>
+        <h4><span class="g-font">Tee Notes</span></h4>
+    </div>
     <table class="table table-striped">
-            <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Title</th>
-                <th scope="col">Created</th>
-                <th scope="col">Edit</th>
-                <th scope="col">Delete</th>
-            </tr>
-            </thead>
-            <tbody>
-                {% for note in notes %}
-                <tr>
-                    <td>{{note.id}}</td>
-                    <td>{{note.title}}</td>
-                    <td>{{note.created}}</td>
-                    <td>
-                        <a href="/notes/edit/{{note.id}}">
-                            <i class="text-primary fa fa-edit"></i>
-                        </a>
-                    </td>
-                    <td><i class="text-danger fa fa-trash"></i> </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Created</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for note in notes %}
+        <tr>
+            <td>{{note.id}}</td>
+            <td>{{note.title}}</td>
+            <td>{{note.created}}</td>
+            <td>
+                <a href="/notes/edit/{{note.id}}">
+                    <i class="text-primary fa fa-edit"></i>
+                </a>
+            </td>
+            <td><a href="/notes/delete/{{note.id}}">
+                <i class="text-danger fa fa-trash"></i>
+            </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 </body>
 </html>

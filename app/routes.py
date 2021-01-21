@@ -186,3 +186,28 @@ def update_note(note_id):
     db.session.commit()
     flash('{} updated successfully!'.format(note.title))
     return redirect(url_for('get_notes'))
+
+
+@app.route('/notes/delete/<note_id>')
+def delete_note(note_id):
+    # check user session and cookies
+    user = check_login()
+    # if user is False redirect to login
+    if user is False:
+        return redirect(url_for('login_page'))
+
+    # get the note
+    note = Notes.query.filter_by(id=note_id).first()
+    if note is None:
+        flash('Note not found!')
+        return redirect(url_for('get_notes'))
+    if note.user_id == user.id:
+        # delete object from database
+        db.session.delete(note)
+        flash('Note deleted successfully!')
+        db.session.commit()
+        return redirect(url_for('get_notes'))
+    else:
+        # user is not the owner of the note.
+        flash('Unable to delete {}! Permission denied.'.format(note.title))
+        return redirect(url_for('get_notes'))
